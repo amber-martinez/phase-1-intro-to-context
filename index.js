@@ -41,16 +41,45 @@ function createTimeOutEvent(empRec, dateStamp) {
 
 function hoursWorkedOnDate(empRec, date) {
 
-    let timeIn = createTimeInEvent(empRec, date);
-    let timeOut = createTimeOutEvent(empRec, date);
+    let timeIn = empRec.timeInEvents.find(function(event) {
+        return event.date === date;
+    })
 
-    return timeOut.timeOutEvents.timeOutObj.hour - timeIn.timeInEvents.timeInObj.hour
-//reduce method?
+    let timeOut = empRec.timeOutEvents.find(function(event) {
+        return event.date === date;
+    })
+
+    return (timeOut.hour - timeIn.hour) / 100;
 }
 
+function wagesEarnedOnDate(empRec, date) {
+    let hoursWorked = hoursWorkedOnDate(empRec, date);
+    let pay = empRec.payPerHour
 
+    return hoursWorked * pay
+}
 
+function allWagesFor(empRec) {
+    let totalWages = [];
 
-// Argument(s) - An employee record Object, A date of the form - "YYYY-MM-DD"
-// Returns - Hours worked, an Integer
-// Behavior - Given a date, find the number of hours elapsed between that date's timeInEvent and timeOutEvent
+        for (let i = 0; i < empRec.timeInEvents.length; i++) {
+            let date = empRec.timeInEvents[i].date;
+            let wage = wagesEarnedOnDate(empRec, date);
+            console.log(wage)
+            totalWages.push(wage)
+          }
+    const reducer = (previousValue, currentValue) => previousValue + currentValue
+    return totalWages.reduce(reducer)
+}
+
+function calculatePayroll(arrayOfRecords) {
+    let payroll = []
+
+        for (let empRec of arrayOfRecords) {
+            let pay = allWagesFor(empRec);
+            payroll.push(pay)
+        }
+
+    const reducer = (previousValue, currentValue) => previousValue + currentValue
+    return payroll.reduce(reducer)
+}
